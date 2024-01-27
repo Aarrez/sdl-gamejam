@@ -31,28 +31,24 @@ void Game::Init()
         std::cerr << "Error getting window surface" << std::endl;
     }
 
-
-
-    for (int i = 0; i < SDL_GetNumRenderDrivers()-1; ++i)
-    {
-        std::cout << SDL_GetRenderDriver(i) << std::endl;
-    }
-    SDL_Renderer* renderer =
+    // for (int i = 0; i < SDL_GetNumRenderDrivers()-1; ++i)
+    // {
+    //     std::cout << SDL_GetRenderDriver(i) << std::endl;
+    // }
+    renderer =
         SDL_CreateRenderer(window,
             NULL,
-            SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    SDL_SetRenderDrawColor(renderer,
-          0, 255, 0, SDL_ALPHA_OPAQUE);
-    SDL_RenderClear(renderer);
-    SDL_RenderPresent(renderer);
+            0);
 
 
 }
 
 void Game::SetupGame()
 {
-
-
+    rect.h = 200;
+    rect.w = 200;
+    rect.x = 200;
+    rect.y = 200;
 }
 
 void Game::Run()
@@ -67,10 +63,8 @@ void Game::Run()
 
 void Game::Destroy()
 {
+    SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-
-    //TODO Fix Exeption
-    // SDL_DestroyRenderer(renderer);
     SDL_Quit();
     std::cout << "SDL quit yes";
 }
@@ -102,25 +96,12 @@ void Game::Inputs()
 
 void Game::Render()
 {
-    SDL_UpdateWindowSurface(window);
-
-    SDL_RenderClear(renderer);
     SDL_SetRenderDrawColor(renderer,
-           0, 0, 255, SDL_ALPHA_OPAQUE);
-
-    rect.h = 200;
-    rect.w = 200;
-    rect.x = 200;
-    rect.y = 200;
-
-    // SDL_RenderRect(renderer, &rect);
-
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-
-    SDL_RenderLine(renderer, 0, 0, 500, 500);
-    // SDL_RenderFillRect(renderer, &rect);
+           0, 255, 0, 255);
 
     SDL_RenderClear(renderer);
+
+    //Paint Window
     SDL_RenderPresent(renderer);
 }
 
