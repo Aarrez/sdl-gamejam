@@ -3,6 +3,7 @@
 #include "SDL3/SDL.h"
 
 
+
 void Game::Init()
 {
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS))
@@ -23,19 +24,34 @@ void Game::Init()
         return;
     }
 
+    windowSurface = SDL_GetWindowSurface(window);
+
+    if(!windowSurface)
+    {
+        std::cerr << "Error getting window surface" << std::endl;
+    }
+
+
+
     for (int i = 0; i < SDL_GetNumRenderDrivers()-1; ++i)
     {
         std::cout << SDL_GetRenderDriver(i) << std::endl;
     }
     SDL_Renderer* renderer =
         SDL_CreateRenderer(window,
-            "opengl",
-            SDL_RENDERER_ACCELERATED);
-
+            NULL,
+            SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     SDL_SetRenderDrawColor(renderer,
-           42, 255, 42, SDL_ALPHA_OPAQUE);
+          0, 255, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
     SDL_RenderPresent(renderer);
+
+
+}
+
+void Game::SetupGame()
+{
+
 
 }
 
@@ -86,6 +102,26 @@ void Game::Inputs()
 
 void Game::Render()
 {
+    SDL_UpdateWindowSurface(window);
+
+    SDL_RenderClear(renderer);
+    SDL_SetRenderDrawColor(renderer,
+           0, 0, 255, SDL_ALPHA_OPAQUE);
+
+    rect.h = 200;
+    rect.w = 200;
+    rect.x = 200;
+    rect.y = 200;
+
+    // SDL_RenderRect(renderer, &rect);
+
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+
+    SDL_RenderLine(renderer, 0, 0, 500, 500);
+    // SDL_RenderFillRect(renderer, &rect);
+
+    SDL_RenderClear(renderer);
+    SDL_RenderPresent(renderer);
 }
 
 void Game::Update()
