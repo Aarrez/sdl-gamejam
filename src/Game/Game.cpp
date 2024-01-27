@@ -24,13 +24,6 @@ void Game::Init()
         return;
     }
 
-    windowSurface = SDL_GetWindowSurface(window);
-
-    if(!windowSurface)
-    {
-        std::cerr << "Error getting window surface" << std::endl;
-    }
-
     // for (int i = 0; i < SDL_GetNumRenderDrivers()-1; ++i)
     // {
     //     std::cout << SDL_GetRenderDriver(i) << std::endl;
@@ -39,16 +32,14 @@ void Game::Init()
         SDL_CreateRenderer(window,
             NULL,
             0);
-
-
 }
 
 void Game::SetupGame()
 {
     rect.h = 200;
     rect.w = 200;
-    rect.x = 200;
-    rect.y = 200;
+    rect.x = (windowWidth/2) - (rect.h/2);
+    rect.y = (windowHeight/2) - (rect.w/2);
 }
 
 void Game::Run()
@@ -101,6 +92,10 @@ void Game::Render()
 
     SDL_RenderClear(renderer);
 
+    SDL_SetRenderDrawColor(renderer,
+           255, 0, 0, 255);
+
+    SDL_RenderFillRect(renderer, &rect);
     //Paint Window
     SDL_RenderPresent(renderer);
 }
