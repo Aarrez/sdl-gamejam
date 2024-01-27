@@ -56,11 +56,19 @@ void Game::SetupGame()
     frect.w = 100;
     frect.x = 0;
     frect.y = 0;
+    frect_vector.push_back(frect);
 
     eatRect.h = 50;
     eatRect.w = 50;
     eatRect.x = (windowWidth/2) - (eatRect.h/2);
     eatRect.y = (windowHeight/2) - (eatRect.w/2);
+
+    centerX = windowWidth/2;
+    centerY = windowHeight/2;
+    circle.x = centerX;
+    circle.y = centerY;
+    circle.r = circleRadius;
+
 }
 
 void Game::Run()
@@ -73,7 +81,7 @@ void Game::Run()
     }
 }
 
-bool Game::Inputs()
+void Game::Inputs()
 {
     SDL_Event e;
     while (SDL_PollEvent(&e))
@@ -105,7 +113,9 @@ bool Game::Inputs()
             case SDLK_d:
                 xMovePos = 1;
                 break;
-            default:;
+            default:
+                std::cout << "x: " << frect.x << std::endl;
+                std::cout << "y: " << frect.y << std::endl;
             }
 
         }
@@ -146,6 +156,11 @@ void Game::UpdateGraphics()
     SDL_SetRenderDrawColor(renderer,
           0, 155, 0, 255);
 
+    DrawCircle(renderer, circle);
+
+    SDL_SetRenderDrawColor(renderer,
+         0, 0, 255, 255);
+
     if(!rectEaten)
         SDL_RenderFillRect(renderer, &eatRect);
 
@@ -159,18 +174,28 @@ void Game::UpdateGraphics()
 
 void Game::Update()
 {
-    frect.x += xMovePos;
-    frect.y += yMovePos;
-    frect.x = std::clamp(frect.x, 0.0f, static_cast<float>(windowWidth));
-    frect.y = std::clamp(frect.y, 0.0f, static_cast<float>(windowHeight));
+    circle.x += xMovePos;
+    circle.y += yMovePos;
+    float tempw = static_cast<float>(windowWidth) - frect.w;
+    float temph = static_cast<float>(windowHeight) - frect.h;
+    frect.x = std::clamp(frect.x, 0.0f, tempw);
+    frect.y = std::clamp(frect.y, 0.0f, temph);
 
-    SDL_bool collision = SDL_HasRectIntersectionFloat(&frect, &eatRect);
-
-    if(collision)
+    if(check_collision(circle, frect_vector))
     {
-        rectEaten = true;
-        std::cout << "In range" << std::endl;
+        std::cout << "Collision Works" << std::endl;
     }
+
+    // if(rectEaten && circle.r < 100)
+    // {
+    //     circle.r++;
+    //     return;
+    // }
+    // if(SDL_HasRectIntersectionFloat(&frect, &eatRect))
+    // {
+    //     rectEaten = true;
+    //     std::cout << "In range" << std::endl;
+    // }
 }
 
 Game::~Game()
@@ -182,4 +207,44 @@ Game::~Game()
     SDL_Quit();
     std::cout << "SDL quit yes";
 }
+
+void Game::DrawCircle(SDL_Renderer * renderer, Circle &circle)
+{
+    const int32_t diameter = (circle.r * 2);
+
+    int32_t x = (circle.r - 1);
+    int32_t y = 0;
+    int32_t tx = 1;
+    int32_t ty = 1;
+    int32_t error = (tx - diameter);
+
+    while (x >= y)
+    {
+        //  Each of the following renders an octant of the circle
+
+        SDL_RenderPoint(renderer, circle.x + x, circle.y - y);
+        SDL_RenderPoint(renderer, circle.x + x, circle.y + y);
+        SDL_RenderPoint(renderer, circle.x - x, circle.y - y);
+        SDL_RenderPoint(renderer, circle.x - x, circle.y + y);
+        SDL_RenderPoint(renderer, circle.x + y, circle.y - x);
+        SDL_RenderPoint(renderer, circle.x + y, circle.y + x);
+        SDL_RenderPoint(renderer, circle.x - y, circle.y - x);
+        SDL_RenderPoint(renderer, circle.x - y, circle.y + x);
+
+        if (error <= 0)
+        {
+            ++y;
+            error += ty;
+            ty += 2;
+        }
+
+        if (error > 0)
+        {
+            --x;
+            tx += 2;
+            error += (tx - diameter);
+        }
+    }
+}
+
 
