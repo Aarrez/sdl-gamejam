@@ -1,6 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 #include <SDL_rect.h>
+#include "../Boids/Boid.h"
+#include "../Boids/BoidManager.h"
 
 
 class Game {
@@ -20,6 +22,7 @@ private:
     class SDL_Window* window{};
     class SDL_Surface* windowSurface{};
     SDL_FRect rect;
+    class BoidManager boidManager;
     void Inputs();
     void Render();
     void Update();

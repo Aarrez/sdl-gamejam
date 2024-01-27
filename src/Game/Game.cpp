@@ -2,6 +2,8 @@
 #include <iostream>
 #include "SDL3/SDL.h"
 
+#include "../Boids/BoidManager.h"
+#include "../Boids/Boid.h"
 
 
 void Game::Init()
@@ -40,6 +42,13 @@ void Game::SetupGame()
     rect.w = 200;
     rect.x = (windowWidth/2) - (rect.h/2);
     rect.y = (windowHeight/2) - (rect.w/2);
+
+    SDL_Rect boidField;
+    boidField.x = 0;
+    boidField.y = 0;
+    boidField.h = windowHeight;
+    boidField.w = windowWidth;
+    boidManager.InitBoids(boidField, 300);
 }
 
 void Game::Run()
@@ -96,11 +105,21 @@ void Game::Render()
            255, 0, 0, 255);
 
     SDL_RenderFillRect(renderer, &rect);
+
+
+    // Draw boid rect
+    SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
+    for (const Boid& boid : boidManager.boids)
+    {
+      SDL_RenderFillRect(renderer, &boid.rect);
+    }
+
     //Paint Window
     SDL_RenderPresent(renderer);
 }
 
 void Game::Update()
 {
+    boidManager.MoveBoids();
 }
 

@@ -11,17 +11,16 @@ void BoidManager::InitBoids(SDL_Rect fieldRect, int boidCount) {
   std::random_device rd;
   std::mt19937 gen(rd());
 
-  std::cout<<fieldRect.x<<" "<<fieldRect.y<<" fieldrect\n";
-
   // Random in range distribution
-  std::uniform_int_distribution<> yDistr(fieldRect.x, fieldRect.x + fieldRect.w);
-  std::uniform_int_distribution<> xDistr(fieldRect.y, fieldRect.y + fieldRect.h);
+  std::uniform_int_distribution<> xDistr(fieldRect.x, fieldRect.x + fieldRect.w);
+  std::uniform_int_distribution<> yDistr(fieldRect.y, fieldRect.y + fieldRect.h);
+  std::uniform_int_distribution<> speed(-1, 1);
   
   for (int i = 0; i < boidCount; i++) {
     int xPos = xDistr(gen);
     int yPos = yDistr(gen);
-    std::cout<<"Creating boid at "<<xPos<<"x. "<<yPos<<"y.\n";
-    Boid b(xPos, yPos, 0, 1);
+
+    Boid b(xPos, yPos, speed(gen), speed(gen));
     boids.push_back(b);
   }
 }
@@ -29,33 +28,31 @@ void BoidManager::InitBoids(SDL_Rect fieldRect, int boidCount) {
 void BoidManager::MoveBoids(){
   for (Boid& boid : boids)
     {
-      std::cout<<"Moving a boid...\n";
       // first = x, second = y.
       std::pair<float, float> separateVel = Separate(boid, 50, 0.0001f);
-      std::cout<<"seperateVel = "<<separateVel.first<<'.'<<separateVel.second<<'\n';
-      // std::pair<float, float> alignVel = Align(boid, 50, .01);
-      // std::pair<float, float> cohereVel = Cohere(boid, 15, .001);
-      // boid.xVel = separateVel.first + alignVel.first + cohereVel.first;
-      // boid.yVel = separateVel.second+ alignVel.second+ cohereVel.second;
+      std::pair<float, float> alignVel = Align(boid, 50, .01);
+      std::pair<float, float> cohereVel = Cohere(boid, 15, .001);
+
+      // std::cout<<"seperateVel = "<<separateVel.first<<'.'<<separateVel.second<<'\n';
+      // std::cout<<"alignVel = "<<alignVel.first<<'.'<<alignVel.second<<'\n';
+      // std::cout<<"cohereVel = "<<cohereVel.first<<'.'<<cohereVel.second<<'\n';
+
+      boid.xVel += separateVel.first + alignVel.first + cohereVel.first;
+      boid.yVel += separateVel.second+ alignVel.second+ cohereVel.second;
     }
+
+  // Move each boid forward
+  for (Boid& boid : boids) {
+    boid.MoveForward();
+    // HandleEdge(boid);
+  }
 }
 
 
 std::pair<float, float> BoidManager::Separate(class Boid& boid, float distance, float power) {
 
   // Get neighbors
-  std::vector<const Boid*> neighbors;
-  for (const auto& other : boids) {
-    float dist = GetDistance(boid, other);
-    if (dist == 0)
-      {
-	continue;
-      }
-    else if (dist < distance)
-      {
-	neighbors.push_back(&other);
-      }
-  }
+  std::vector<const Boid*> neighbors = GetNeighbors(boid, distance);
 
   float sumClosenessX, sumClosenessY = 0;
   for (const Boid* neighbor : neighbors)
@@ -70,13 +67,45 @@ std::pair<float, float> BoidManager::Separate(class Boid& boid, float distance, 
 }
 
 std::pair<float, float> BoidManager::Align(class Boid& boid, float distance, float power) {
+  auto neighbors = GetNeighbors(boid, distance);
+  // Does this return work?
+  if (neighbors.empty())
+  {
+    return std::make_pair(0.0f,0.0f);
+  }
 
-  return std::make_pair(0.0f,0.0f); // Something went wrong
+  float sumVelX = 0;
+  float sumVelY = 0;
+  for (auto n : neighbors) {
+    sumVelX += n->xVel;
+    sumVelY += n->yVel;
+  }
+
+  float meanVelX = sumVelX / neighbors.size();
+  float meanVelY = sumVelY / neighbors.size();
+
+  float xVel = meanVelX - boid.xVel;
+  float yVel = meanVelY - boid.yVel;
+  return std::make_pair(xVel * power, yVel * power);
+
 }
 
 std::pair<float, float> BoidManager::Cohere(class Boid& boid, float distance, float power) {
-  
-  return std::make_pair(0.0f,0.0f); // Something went wrong
+  auto neighbors = GetNeighbors(boid, distance);
+  if (neighbors.empty())
+  {
+    return std::make_pair(0.0f,0.0f);
+  }
+  float sumX, sumY = 0;
+  for (auto n : neighbors) {
+    sumX += n->rect.x;
+    sumY += n->rect.y;
+  }
+
+  float meanX, meanY = 0;
+  float deltaCenterX = meanX - boid.rect.x;
+  float deltaCenterY = meanY - boid.rect.y;
+  return std::make_pair(deltaCenterX * power, deltaCenterY * power);
 }
 
 float BoidManager::GetDistance(const Boid& boid1, const Boid& boid2) {
@@ -88,4 +117,40 @@ float BoidManager::GetDistance(const Boid& boid1, const Boid& boid2) {
   //  std::cout<<"Distance "<<dist<<'\n';
 
   return dist;
+}
+
+std::vector<const Boid*> BoidManager::GetNeighbors(const Boid& boid, float distance) {
+  
+  std::vector<const Boid*> neighbors;
+
+  for (const auto& other : boids) {
+    float dist = GetDistance(boid, other);
+    if (dist == 0)
+    {
+	continue;
+    }
+    else if (dist < distance)
+    {
+	neighbors.push_back(&other);
+    }
+  }
+
+  return neighbors;
+}
+
+void BoidManager::HandleEdge(class Boid& boid) {
+
+  // WrapAround
+  if (boid.rect.x < fieldRect.x){
+    boid.rect.x += fieldRect.w;
+  }
+  if (boid.rect.x > (fieldRect.x + fieldRect.w)){
+    boid.rect.x -= fieldRect.w;
+  }
+  if (boid.rect.y < fieldRect.y){
+    boid.rect.y += fieldRect.h;
+  }
+  if (boid.rect.y > (fieldRect.y + fieldRect.h)){
+    boid.rect.y -= fieldRect.h;
+  }
 }
