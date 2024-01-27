@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 find_package(SDL3 REQUIRED COMPONENTS SDL3)
 add_executable(untitled src/main.cpp
-        src/Game/Game.h
-        src/Game/Game.cpp)
+        src/Game/Game.cpp
+        src/Boids/Boid.cpp
+	src/Boids/BoidManager.cpp)
 target_link_libraries(untitled PRIVATE SDL3::SDL3)
