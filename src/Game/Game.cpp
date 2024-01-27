@@ -1,5 +1,6 @@
 #include "Game.h"
 #include <iostream>
+#include <algorithm>
 #include "SDL3/SDL.h"
 #include "../Boids/BoidManager.h"
 #include "../Boids/Boid.h"
