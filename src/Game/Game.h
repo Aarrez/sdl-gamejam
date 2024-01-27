@@ -5,23 +5,26 @@
 
 class Game {
 public:
-    Game()= default;
-    ~Game()= default;
-
+    Game();
+    ~Game();
     int windowHeight= 600;
     int windowWidth = 800;
     bool isRunning = true;
-    void Init();
+    bool isRender = true;
     void SetupGame();
     void Run();
-    void Destroy();
 private:
     class SDL_Renderer* renderer{};
     class SDL_Window* window{};
     class SDL_Surface* windowSurface{};
-    SDL_FRect rect;
-    void Inputs();
-    void Render();
+    SDL_Surface* img{};
+    int xMovePos {0};
+    int yMovePos {0};
+    SDL_FRect frect;
+    SDL_FRect eatRect;
+    bool rectEaten = false;
+    bool Inputs();
+    void UpdateGraphics();
     void Update();
 
 };
