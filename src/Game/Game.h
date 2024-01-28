@@ -99,7 +99,7 @@ private:
     std::vector<SDL_FRect> frect_vector;
     int centerX;
     int centerY;
-    int32_t circleRadius = 100;
+    int32_t circleRadius = 50;
     bool disableCircle = false;
     bool rectEaten = false;
     void DrawCircle(SDL_Renderer * renderer, Circle &circle);
@@ -108,7 +108,4 @@ private:
     void Update();
 
 };
-
-
-
 #endif //GAME_H
