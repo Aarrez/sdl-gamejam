@@ -166,7 +166,8 @@ void Game::UpdateGraphics()
     SDL_SetRenderDrawColor(renderer,
           0, 155, 0, 255);
 
-    DrawCircle(renderer, circle);
+    if(rectEaten)
+        DrawCircle(renderer, circle);
 
     SDL_SetRenderDrawColor(renderer,
          0, 0, 255, 255);
@@ -192,28 +193,34 @@ void Game::UpdateGraphics()
 void Game::Update()
 {
 
-    circle.x += xMovePos;
-    circle.y += yMovePos;
+    frect.x += xMovePos;
+    frect.y += yMovePos;
     float tempw = static_cast<float>(windowWidth) - frect.w;
     float temph = static_cast<float>(windowHeight) - frect.h;
     frect.x = std::clamp(frect.x, 0.0f, tempw);
     frect.y = std::clamp(frect.y, 0.0f, temph);
 
-    if(check_collision(circle, frect_vector))
+
+
+
+    if(rectEaten)
     {
-        std::cout << "Collision Works" << std::endl;
+        if(circle.r < 100)
+            circle.r++;;
+
+        circle.x = frect.x + frect.w/2;
+        circle.y = frect.y + frect.h/2;
+        if(check_collision(circle, frect_vector))
+        {
+
+        }
+    }
+    if(SDL_HasRectIntersectionFloat(&frect, &eatRect) && rectEaten == false)
+    {
+        rectEaten = true;
+        // std::cout << "In range" << std::endl;
     }
 
-    // if(rectEaten && circle.r < 100)
-    // {
-    //     circle.r++;
-    //     return;
-    // }
-    // if(SDL_HasRectIntersectionFloat(&frect, &eatRect))
-    // {
-    //     rectEaten = true;
-    //     std::cout << "In range" << std::endl;
-    // }
 
 
     boidManager.MoveBoids();
