@@ -109,20 +109,20 @@ void Game::Inputs()
                 //Close program input
             case SDLK_ESCAPE:
                 isRunning = false;
-                break;
+                continue;
                 //Movement input
             case SDLK_w:
                 yMovePos = -1;
-                break;
+		continue;
             case SDLK_s:
                 yMovePos = 1;
-                break;
+		continue;
             case SDLK_a:
                 xMovePos = -1;
-                break;
+		continue;
             case SDLK_d:
                 xMovePos = 1;
-                break;
+		continue;
             default:
                 std::cout << "x: " << frect.x << std::endl;
                 std::cout << "y: " << frect.y << std::endl;
@@ -133,19 +133,25 @@ void Game::Inputs()
         {
             switch (e.key.keysym.sym)
             {
-                //Reset movenet input
+	      // Reset movement values 
             case SDLK_w:
+	      if (yMovePos < 0)
                 yMovePos = 0;
+	      continue;
             case SDLK_s:
+	      if (yMovePos > 0)
                 yMovePos = 0;
-                break;
-
+	      continue;
             case SDLK_a:
+	      if (xMovePos < 0)
                 xMovePos = 0;
+	      continue;
             case SDLK_d:
+	      if (xMovePos > 0)
                 xMovePos = 0;
-                break;
-            default:;
+	      continue;
+            default:
+	      continue;
             }
         }
     }
