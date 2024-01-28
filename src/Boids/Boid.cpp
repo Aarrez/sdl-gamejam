@@ -7,8 +7,8 @@ Boid::Boid(float a_xPos, float a_yPos, float a_xVel, float a_yVel){
   yVel = a_yVel;
   xVel = a_xVel;
 
-  rect.h = 5;
-  rect.w = 5;
+  rect.h = 15;
+  rect.w = 15;
 }
 
 float Boid::GetSpeed() {

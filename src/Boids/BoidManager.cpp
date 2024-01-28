@@ -14,7 +14,8 @@ void BoidManager::InitBoids(SDL_Rect fieldRect, int boidCount) {
   // Random in range distribution
   std::uniform_int_distribution<> xDistr(fieldRect.x, fieldRect.x + fieldRect.w);
   std::uniform_int_distribution<> yDistr(fieldRect.y, fieldRect.y + fieldRect.h);
-  std::uniform_int_distribution<> speed(-1, 1);
+  std::uniform_real_distribution<> speed(-1, 1);
+  
   
   for (int i = 0; i < boidCount; i++) {
     int xPos = xDistr(gen);
@@ -31,20 +32,20 @@ void BoidManager::MoveBoids(){
       // first = x, second = y.
       std::pair<float, float> separateVel = Separate(boid, 50, 0.0001f);
       std::pair<float, float> alignVel = Align(boid, 50, .01);
-      std::pair<float, float> cohereVel = Cohere(boid, 15, .001);
+      std::pair<float, float> cohereVel = Cohere(boid, 15, .0001);
 
       // std::cout<<"seperateVel = "<<separateVel.first<<'.'<<separateVel.second<<'\n';
       // std::cout<<"alignVel = "<<alignVel.first<<'.'<<alignVel.second<<'\n';
       // std::cout<<"cohereVel = "<<cohereVel.first<<'.'<<cohereVel.second<<'\n';
 
       boid.xVel += separateVel.first + alignVel.first + cohereVel.first;
-      boid.yVel += separateVel.second+ alignVel.second+ cohereVel.second;
+      boid.yVel += separateVel.second + alignVel.second + cohereVel.second;
     }
 
   // Move each boid forward
   for (Boid& boid : boids) {
     boid.MoveForward();
-    // HandleEdge(boid);
+    HandleEdge(boid);
   }
 }
 
@@ -140,7 +141,20 @@ std::vector<const Boid*> BoidManager::GetNeighbors(const Boid& boid, float dista
 
 void BoidManager::HandleEdge(class Boid& boid) {
 
+  // Smooth turn away when near walls
+  float pad = 10.0f;
+  float turn = 0.5f;
+  if (boid.rect.x < fieldRect.x + pad)
+    boid.xVel += turn;
+  if (boid.rect.x > fieldRect.w - pad)
+    boid.xVel -= turn;
+  if (boid.rect.y < fieldRect.y + pad)
+    boid.yVel += turn;
+  if (boid.rect.y > fieldRect.h - pad)
+    boid.yVel -= turn;
+
   // WrapAround
+  /*
   if (boid.rect.x < fieldRect.x){
     boid.rect.x += fieldRect.w;
   }
@@ -153,4 +167,5 @@ void BoidManager::HandleEdge(class Boid& boid) {
   if (boid.rect.y > (fieldRect.y + fieldRect.h)){
     boid.rect.y -= fieldRect.h;
   }
+  */
 }

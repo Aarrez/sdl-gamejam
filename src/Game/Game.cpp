@@ -78,7 +78,7 @@ void Game::SetupGame()
     boidField.y = 0;
     boidField.h = windowHeight;
     boidField.w = windowWidth;
-    boidManager.InitBoids(boidField, 300);
+    boidManager.InitBoids(boidField, 100);
 }
 
 void Game::Run()
